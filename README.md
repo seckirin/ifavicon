@@ -5,7 +5,7 @@ ifavicon 是一个用于获取目标网站 favicon hash 的脚本，获取到的
 # Installation
 
 ```bash
-go install github.com/yuukiz/ifavicon@latest
+go install github.com/yuukisec/ifavicon@latest
 ```
 
 # Use Example
