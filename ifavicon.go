@@ -21,6 +21,7 @@ type Config struct {
 	URL      string
 	File     string
 	Download bool
+	Silent   bool
 }
 
 func getContentFromURL(requestURL string) ([]byte, error) {
@@ -85,9 +86,10 @@ func standardBase64(braw []byte) []byte {
 
 func main() {
 	config := Config{}
-	flag.StringVar(&config.File, "file", "", "Get favicon hash from target url")
+	flag.StringVar(&config.File, "file", "", "Get favicon hash from target URL")
 	flag.StringVar(&config.URL, "url", "", "Get favicon hash from target file")
-	flag.BoolVar(&config.Download, "download", false, "Download favicon from url")
+	flag.BoolVar(&config.Download, "download", false, "Download favicon from URL")
+	flag.BoolVar(&config.Silent, "silent", false, "Silent Mode")
 	flag.Parse()
 
 	if config.URL == "" && config.File == "" {
@@ -121,7 +123,7 @@ func main() {
 			}
 		}
 		hash := mmh3Hash32(standardBase64(content))
-		output(hash)
+		output(hash, config)
 		os.Exit(0)
 	}
 
@@ -132,12 +134,16 @@ func main() {
 			os.Exit(1)
 		}
 		hash := mmh3Hash32(standardBase64(content))
-		output(hash)
+		output(hash, config)
 		os.Exit(0)
 	}
 }
 
-func output(hash string) {
+func output(hash string, config Config) {
+	if config.Silent {
+		fmt.Printf(hash)
+		os.Exit(0)
+	}
 	fmt.Printf("FOFA:\n")
 	fmt.Printf("  icon_hash=\"%s\"\n", hash)
 	fmt.Printf("  link: https://fofa.info/result?qbase64=%s\n", base64.StdEncoding.EncodeToString([]byte("icon_hash="+hash)))
