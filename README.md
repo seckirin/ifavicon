@@ -19,4 +19,7 @@ ifavicon -download https://example.com/favicon.ico
 
 # 解析文件的 favicon hash / Get favicon hash from target file
 ifavicon -file example.com.favicon.ico
+
+# 使用代理请求目标 URL / Use proxy request target URL
+ifavicon -url https://example.com/favicon.ico -proxy 127.0.0.1:7890
 ```

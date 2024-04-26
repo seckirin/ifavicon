@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/twmb/murmur3"
+	"golang.org/x/net/proxy"
 )
 
 type Config struct {
@@ -22,20 +23,37 @@ type Config struct {
 	File     string
 	Download bool
 	Silent   bool
+	Proxy    string
 }
 
-func getContentFromURL(requestURL string) ([]byte, error) {
-	client := &http.Client{
-		Timeout: time.Second * 10,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
+func getContentFromURL(requestURL string, proxyURL string) ([]byte, error) {
+	var client *http.Client
+
+	if proxyURL != "" {
+		dialer, err := proxy.SOCKS5("tcp", proxyURL, nil, proxy.Direct)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "can't connect to the proxy:", err)
+			os.Exit(1)
+		}
+		httpTransport := &http.Transport{}
+		client = &http.Client{Transport: httpTransport}
+		httpTransport.Dial = dialer.Dial
+	} else {
+		client = &http.Client{
+			Timeout: time.Second * 10,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
 	}
 
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -90,6 +108,7 @@ func main() {
 	flag.StringVar(&config.URL, "url", "", "Get favicon hash from target URL")
 	flag.BoolVar(&config.Download, "download", false, "Download favicon from URL")
 	flag.BoolVar(&config.Silent, "silent", false, "Silent Mode")
+	flag.StringVar(&config.Proxy, "proxy", "", "Specify http, https or socks proxy")
 	flag.Parse()
 
 	if config.URL == "" && config.File == "" {
@@ -105,7 +124,7 @@ func main() {
 		if !strings.HasSuffix(config.URL, "favicon.ico") {
 			config.URL = config.URL + "/favicon.ico"
 		}
-		content, err := getContentFromURL(config.URL)
+		content, err := getContentFromURL(config.URL, config.Proxy)
 		if err != nil {
 			fmt.Printf("%s\n", err)
 			os.Exit(1)
