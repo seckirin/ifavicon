@@ -86,8 +86,8 @@ func standardBase64(braw []byte) []byte {
 
 func main() {
 	config := Config{}
-	flag.StringVar(&config.File, "file", "", "Get favicon hash from target URL")
-	flag.StringVar(&config.URL, "url", "", "Get favicon hash from target file")
+	flag.StringVar(&config.File, "file", "", "Get favicon hash from target file")
+	flag.StringVar(&config.URL, "url", "", "Get favicon hash from target URL")
 	flag.BoolVar(&config.Download, "download", false, "Download favicon from URL")
 	flag.BoolVar(&config.Silent, "silent", false, "Silent Mode")
 	flag.Parse()
