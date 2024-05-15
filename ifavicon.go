@@ -24,6 +24,8 @@ type Config struct {
 	Download bool
 	Silent   bool
 	Proxy    string
+	Fofa     bool
+	Shodan   bool
 }
 
 func getContentFromURL(requestURL string, proxyURL string) ([]byte, error) {
@@ -109,6 +111,8 @@ func main() {
 	flag.BoolVar(&config.Download, "download", false, "Download favicon from URL")
 	flag.BoolVar(&config.Silent, "silent", false, "Silent Mode")
 	flag.StringVar(&config.Proxy, "proxy", "", "Specify http, https or socks proxy")
+	flag.BoolVar(&config.Fofa, "fofa", false, "Output only fofa results")
+	flag.BoolVar(&config.Shodan, "shodan", false, "Output only shodan results")
 	flag.Parse()
 
 	if config.URL == "" && config.File == "" {
@@ -160,7 +164,27 @@ func main() {
 
 func output(hash string, config Config) {
 	if config.Silent {
-		fmt.Printf(hash)
+		if config.Fofa {
+			fmt.Printf("icon_hash=%s\n", hash)
+			os.Exit(0)
+		}
+		if config.Shodan {
+			fmt.Printf("http.favicon.hash:%s\n", hash)
+			os.Exit(0)
+		}
+		fmt.Printf("%s\n", hash)
+		os.Exit(0)
+	}
+	if config.Fofa {
+		fmt.Printf("FOFA:\n")
+		fmt.Printf("  icon_hash=\"%s\"\n", hash)
+		fmt.Printf("  link: https://fofa.info/result?qbase64=%s\n", base64.StdEncoding.EncodeToString([]byte("icon_hash="+hash)))
+		os.Exit(0)
+	}
+	if config.Shodan {
+		fmt.Printf("Shodan:\n")
+		fmt.Printf("  http.favicon.hash:%s\n", hash)
+		fmt.Printf("  link: https://www.shodan.io/search?query=http.favicon.hash%%3A%s\n", hash)
 		os.Exit(0)
 	}
 	fmt.Printf("FOFA:\n")
