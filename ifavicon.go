@@ -188,7 +188,7 @@ func output(hash string, config Config) {
 		os.Exit(0)
 	}
 	fmt.Printf("FOFA:\n")
-	fmt.Printf("  icon_hash=\"%s\"\n", hash)
+	fmt.Printf("  icon_hash=%s\n", hash)
 	fmt.Printf("  link: https://fofa.info/result?qbase64=%s\n", base64.StdEncoding.EncodeToString([]byte("icon_hash="+hash)))
 	fmt.Printf("Shodan:\n")
 	fmt.Printf("  http.favicon.hash:%s\n", hash)
